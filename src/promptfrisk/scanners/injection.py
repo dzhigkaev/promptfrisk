@@ -55,19 +55,28 @@ _PATTERNS: list[InjectionPattern] = [
     ),
     InjectionPattern(
         "role_switch",
+        # "act as ..." / "you are now ..." is extremely common in legitimate
+        # prompts, so this only FLAGs (severity < block threshold). Genuinely
+        # dangerous role swaps (DAN, unfiltered) are caught by jailbreak_dan.
         re.compile(
             r"(you\s+are\s+now|act\s+as|pretend\s+(to\s+be|you'?re)|"
             r"from\s+now\s+on\s+you|roleplay\s+as)",
             re.IGNORECASE,
         ),
-        0.8,
-        "Attempts to change the assistant's role",
+        0.6,
+        "Role-change request (often benign; flagged for visibility)",
     ),
     InjectionPattern(
         "jailbreak_dan",
+        # Require jailbreak *context* so a bare word like the name "DAN" or
+        # "unfiltered coffee" doesn't trip a BLOCK.
         re.compile(
-            r"(\bDAN\b|do\s+anything\s+now|jailbreak|bypass\s+(filters?|guardrails?|safety)|"
-            r"unfiltered|uncensored|jailbroken)",
+            r"you\s+are\s+(now\s+)?DAN\b"
+            r"|\bDAN\s+mode\b"
+            r"|do\s+anything\s+now"
+            r"|jailbreak"
+            r"|bypass\s+(your\s+)?(filters?|guardrails?|safety|restrictions?|rules?)"
+            r"|(unfiltered|uncensored|jailbroken)\s+(mode|model|version|ai|assistant)",
             re.IGNORECASE,
         ),
         0.95,

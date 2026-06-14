@@ -32,6 +32,21 @@ class PIIPattern:
     category: str
 
 
+def _luhn_valid(number: str) -> bool:
+    """Luhn checksum — filters out random digit strings that merely look like cards."""
+    digits = [int(c) for c in number if c.isdigit()]
+    if len(digits) < 13:
+        return False
+    checksum = 0
+    for i, d in enumerate(reversed(digits)):
+        if i % 2 == 1:
+            d *= 2
+            if d > 9:
+                d -= 9
+        checksum += d
+    return checksum % 10 == 0
+
+
 _PATTERNS: list[PIIPattern] = [
     PIIPattern(
         "email",
@@ -79,6 +94,9 @@ class PIIScanner(BaseScanner):
             if pii.category not in self.categories:
                 continue
             for m in pii.pattern.finditer(text):
+                # Validate card-like matches with Luhn to cut false positives.
+                if pii.name == "credit_card" and not _luhn_valid(m.group()):
+                    continue
                 findings.append(
                     Finding(
                         scanner=self.name,
