@@ -101,3 +101,7 @@ class GuardrailConfig:
     block_threshold: float = 0.8
     fail_open: bool = False  # on scanner error: True → allow, False → block
     redact: bool = True      # apply scanner text modifications (e.g. PII masking)
+    # Defense-in-depth against pathological/ReDoS inputs: text longer than this is
+    # truncated before scanning (and flagged), bounding regex work regardless of
+    # any single pattern's complexity. Set to 0 to disable.
+    max_text_length: int = 100_000
