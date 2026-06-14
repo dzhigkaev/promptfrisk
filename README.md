@@ -113,6 +113,16 @@ class MyMLScanner(BaseScanner):
 guard.register(MyMLScanner())
 ```
 
+## Security & scope
+
+promptfrisk is a **heuristic, defense-in-depth filter — not a sole security
+control.** It catches obvious attacks fast and cheaply; it does not stop
+determined/novel adversaries the way a trained classifier would. Regex scanning
+is ReDoS-guarded via a configurable input-length cap (`max_text_length`).
+
+See [SECURITY.md](SECURITY.md) for the full threat model (in/out of scope), the
+ReDoS audit, and how to report vulnerabilities.
+
 ## License
 
 Apache-2.0

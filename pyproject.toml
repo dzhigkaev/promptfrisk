@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "promptfrisk"
-version = "0.1.0"
+version = "0.2.0"
 description = "Frisk the LLM boundary: scan inputs and outputs for prompt injection, PII, secrets, and risky tool calls."
 readme = "README.md"
 license = { text = "Apache-2.0" }

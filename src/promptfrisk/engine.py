@@ -50,11 +50,27 @@ class Guardrail:
     def scan(self, text: str, context: ScanContext | None = None) -> GuardResult:
         """Run all text scanners over ``text`` and aggregate the results."""
         context = context or ScanContext()
-        current = text
         results: list[ScanResult] = []
         findings: list[Finding] = []
         overall = Action.ALLOW
         confidence = 0.0
+
+        # ReDoS / resource guard: cap the text fed to regex scanners so a crafted
+        # megabyte payload can't blow up scan time, and flag that we truncated.
+        current = text
+        limit = self.config.max_text_length
+        if limit and len(text) > limit:
+            current = text[:limit]
+            findings.append(
+                Finding(
+                    scanner="engine",
+                    category="oversized_input",
+                    message=f"input exceeded max_text_length ({limit}); truncated for scanning",
+                    confidence=0.5,
+                )
+            )
+            overall = max(overall, Action.FLAG)
+            confidence = 0.5
 
         for scanner in self.scanners:
             try:
